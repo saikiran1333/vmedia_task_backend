@@ -22,4 +22,9 @@ export const env = Object.freeze({
 
   RATE_LIMIT_WINDOW_MS: parseInt(process.env.RATE_LIMIT_WINDOW_MS, 10) || 15 * 60 * 1000,
   RATE_LIMIT_MAX_REQUESTS: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS, 10) || 500,
+
+  // Token lifetime only. The signing secret is read where the token is created and is not stored here.
+  JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || '8h',
+  LOGIN_RATE_LIMIT_MAX: parseInt(process.env.LOGIN_RATE_LIMIT_MAX, 10) || 30,
+  ENQUIRY_RATE_LIMIT_MAX: parseInt(process.env.ENQUIRY_RATE_LIMIT_MAX, 10) || 60,
 });

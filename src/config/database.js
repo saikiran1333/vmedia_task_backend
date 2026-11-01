@@ -4,6 +4,9 @@ import { logger } from '../utils/logger.js';
 
 const { Pool } = pg;
 
+// Keep DATE columns as YYYY-MM-DD text. node-postgres otherwise builds a Date at local midnight.
+pg.types.setTypeParser(1082, (value) => value);
+
 // node-postgres does not implement libpq channel_binding. Neon connection
 // strings often include it; leaving it in the URL makes pg reject the string.
 export const toDriverConnectionString = (rawUrl) => {
@@ -16,6 +19,31 @@ export const toDriverConnectionString = (rawUrl) => {
     url.searchParams.set('sslmode', 'verify-full');
   }
   return url.toString();
+};
+
+// Migrations and the seed use the direct Neon host. The API pool stays on the pooler.
+export const toDirectConnectionString = (rawUrl, unpooledOverride = '') => {
+  if (unpooledOverride) return toDriverConnectionString(unpooledOverride);
+  if (!rawUrl) return '';
+  const url = new URL(rawUrl);
+  url.hostname = url.hostname.replace('-pooler', '');
+  return toDriverConnectionString(url.toString());
+};
+
+export const createDirectPool = () => {
+  const connectionString = toDirectConnectionString(
+    env.DATABASE_URL,
+    process.env.DATABASE_URL_UNPOOLED || ''
+  );
+  if (!connectionString) return null;
+  return new Pool({
+    connectionString,
+    max: 1,
+    idleTimeoutMillis: 30_000,
+    connectionTimeoutMillis: env.DB_CONNECTION_TIMEOUT_MS,
+    allowExitOnIdle: true,
+    ssl: { rejectUnauthorized: true },
+  });
 };
 
 const connectionString = toDriverConnectionString(env.DATABASE_URL);

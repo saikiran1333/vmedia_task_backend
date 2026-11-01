@@ -24,7 +24,7 @@ app.use(
   cors({
     origin: env.CORS_ORIGIN === '*' ? '*' : env.CORS_ORIGIN.split(',').map((origin) => origin.trim()),
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-Id'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-Id', 'Idempotency-Key'],
     credentials: env.CORS_ORIGIN !== '*',
   })
 );
@@ -33,8 +33,8 @@ app.use(
 app.use(compression());
 
 // Body parsers for JSON and URL-encoded payloads.
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.json({ limit: '256kb' }));
+app.use(express.urlencoded({ extended: true, limit: '256kb' }));
 
 // Request tracing and performance duration logging.
 app.use(requestLogger);

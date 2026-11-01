@@ -1,6 +1,6 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert';
-import { toDriverConnectionString } from '../src/config/database.js';
+import { toDirectConnectionString, toDriverConnectionString } from '../src/config/database.js';
 
 describe('Neon connection string for node-postgres', () => {
   test('empty url stays empty', () => {
@@ -15,5 +15,15 @@ describe('Neon connection string for node-postgres', () => {
     assert.strictEqual(url.searchParams.get('sslmode'), 'verify-full');
     assert.strictEqual(url.username, 'neondb_owner');
     assert.ok(url.hostname.includes('-pooler'));
+  });
+
+  test('direct migration host drops the pooler segment', () => {
+    const raw =
+      'postgresql://neondb_owner:secret@ep-example-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require';
+    const url = new URL(toDirectConnectionString(raw));
+    assert.strictEqual(url.hostname.includes('-pooler'), false);
+    assert.strictEqual(url.hostname, 'ep-example.us-east-1.aws.neon.tech');
+    assert.strictEqual(url.searchParams.get('channel_binding'), null);
+    assert.strictEqual(url.password, 'secret');
   });
 });

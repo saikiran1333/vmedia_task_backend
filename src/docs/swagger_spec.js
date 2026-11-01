@@ -1,3 +1,5 @@
+import { cataloguePaths, catalogueComponents } from './swagger_catalogue.js';
+
 // OpenAPI 3.0 specification definition for Vmedia backend services.
 export const swaggerSpec = {
   openapi: '3.0.0',
@@ -18,6 +20,7 @@ export const swaggerSpec = {
     },
   ],
   paths: {
+    ...cataloguePaths,
     '/hello': {
       get: {
         tags: ['Hello'],
@@ -78,7 +81,9 @@ export const swaggerSpec = {
     },
   },
   components: {
+    securitySchemes: catalogueComponents.securitySchemes,
     schemas: {
+      ...catalogueComponents.schemas,
       HelloSuccessResponse: {
         type: 'object',
         properties: {
